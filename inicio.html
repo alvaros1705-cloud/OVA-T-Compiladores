@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OVA – Análisis Léxico | USB</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Source+Code+Pro:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --g:#0A843B;--g2:#12b554;--g3:#0d9946;--gd:#065828;--gdd:#032e16;
+  --gc:#ACCDB6;--gl:#E8F5EE;
+  --neon:rgba(10,132,59,0.8);--neon2:rgba(18,181,84,0.6);
+  --bg:#060e08;--bg2:#0b1a0f;--bg3:#0f2118;
+  --card:#111c14;--card2:#162219;
+  --surface:#0e1a11;
+  --text:#e8f5ee;--text2:#9ebfaa;--text3:#607a6a;
+  --border:rgba(10,132,59,0.25);--border2:rgba(10,132,59,0.5);
+  --r8:8px;--r12:12px;--r16:16px;--r24:24px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--g);border-radius:3px}
+#particle-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:.35}
+header{background:rgba(6,14,8,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1000;}
+.header-inner{display:flex;align-items:center;gap:14px;padding:10px 28px;max-width:1240px;margin:0 auto;}
+.logo-usb{width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--g),var(--g2));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:9px;color:#fff;text-align:center;line-height:1.2;flex-shrink:0;letter-spacing:.3px;box-shadow:0 0 20px rgba(10,132,59,.5);border:1.5px solid var(--g2);}
+.header-text h1{font-family:'Montserrat',sans-serif;color:#fff;font-size:1rem;font-weight:700;letter-spacing:.3px}
+.header-text p{color:var(--text2);font-size:.72rem;font-weight:300;margin-top:1px}
+.header-author{margin-left:auto;color:var(--text2);font-size:.7rem;text-align:right;line-height:1.5}
+.header-author strong{color:var(--g2);font-weight:600}
+nav{background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;white-space:nowrap;position:relative;}
+nav::-webkit-scrollbar{height:2px}
+nav ul{list-style:none;display:flex;max-width:1240px;margin:0 auto;padding:0 20px;position:relative}
+nav ul li a{display:block;color:var(--text2);text-decoration:none;padding:12px 20px;font-size:.78rem;font-weight:600;font-family:'Montserrat',sans-serif;letter-spacing:.4px;transition:all .25s;position:relative;}
+nav ul li a::after{content:'';position:absolute;bottom:0;left:50%;right:50%;height:2px;background:var(--g2);box-shadow:0 0 8px var(--g2);transition:left .3s,right .3s;}
+nav ul li a:hover{color:#fff}
+nav ul li a.active{color:var(--g2)}
+nav ul li a.active::after{left:16px;right:16px}
+.hero{position:relative;overflow:hidden;z-index:1;padding:90px 28px 80px;text-align:center;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(10,132,59,.18) 0%,transparent 70%);}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(10,132,59,.15);border:1px solid var(--border2);border-radius:20px;padding:6px 16px;font-size:.72rem;color:var(--g2);letter-spacing:1px;text-transform:uppercase;font-weight:700;margin-bottom:20px;font-family:'Montserrat',sans-serif;}
+.hero-badge span{width:6px;height:6px;border-radius:50%;background:var(--g2);display:inline-block;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.hero h2{font-family:'Montserrat',sans-serif;color:#fff;font-size:clamp(2rem,5vw,3.5rem);font-weight:900;line-height:1.1;letter-spacing:-1px;margin-bottom:14px;text-shadow:0 0 60px rgba(10,132,59,.3);}
+.hero h2 .accent{color:transparent;background:linear-gradient(90deg,var(--g2),#39ff9e,var(--g2));background-clip:text;-webkit-background-clip:text;background-size:200% 100%;animation:shimmer 4s linear infinite;}
+@keyframes shimmer{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+.hero p{color:var(--text2);font-size:1.05rem;max-width:560px;margin:0 auto 36px;line-height:1.7;font-weight:300}
+.typewriter-wrap{position:relative;max-width:680px;margin:0 auto;background:rgba(0,0,0,.5);border:1px solid var(--border2);border-radius:var(--r16);overflow:hidden;box-shadow:0 0 40px rgba(10,132,59,.2),0 20px 60px rgba(0,0,0,.5);}
+.tw-bar{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--border);padding:10px 16px;}
+.tw-dot{width:10px;height:10px;border-radius:50%}
+.tw-dot.r{background:#ff5f57}.tw-dot.y{background:#febc2e}.tw-dot.g{background:var(--g2);box-shadow:0 0 6px var(--g2)}
+.tw-title{font-family:'Montserrat',sans-serif;font-size:.7rem;color:var(--text3);margin-left:auto;letter-spacing:.5px}
+.tw-body{padding:20px 24px;font-family:'Source Code Pro',monospace;font-size:.85rem;text-align:left;min-height:100px;line-height:1.8}
+#tw-output{color:var(--text)}
+.tw-cursor{display:inline-block;width:2px;height:1em;background:var(--g2);vertical-align:middle;animation:blink .7s infinite;margin-left:2px;box-shadow:0 0 6px var(--g2)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.token-result-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+main{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:48px 24px 100px}
+.section{display:none;animation:sectionIn .4s ease}
+.section.active{display:block}
+@keyframes sectionIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.section-title{font-family:'Montserrat',sans-serif;font-size:clamp(1.4rem,3vw,2rem);font-weight:900;color:#fff;letter-spacing:-0.5px;margin-bottom:6px;display:flex;align-items:center;gap:12px;}
+.section-title::before{content:'';width:4px;height:2em;border-radius:2px;flex-shrink:0;background:linear-gradient(to bottom,var(--g2),var(--gd));box-shadow:0 0 12px var(--g2);}
+.section-sub{color:var(--text2);font-size:.88rem;margin:0 0 36px 16px;font-weight:300;padding-left:4px}
+.content-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px;margin-bottom:36px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r16);padding:26px;position:relative;overflow:hidden;transition:transform .3s,box-shadow .3s,border-color .3s;cursor:default;}
+.card::before{content:'';position:absolute;inset:0;border-radius:var(--r16);background:linear-gradient(135deg,rgba(10,132,59,.08) 0%,transparent 60%);pointer-events:none;}
+.card:hover{transform:translateY(-5px);border-color:var(--g2);box-shadow:0 0 0 1px var(--border2),0 8px 40px rgba(10,132,59,.25),0 0 20px rgba(10,132,59,.1);}
+.card-icon{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,rgba(10,132,59,.3),rgba(10,132,59,.1));border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:14px;box-shadow:0 0 16px rgba(10,132,59,.2);}
+.card h3{font-family:'Montserrat',sans-serif;font-size:.95rem;font-weight:700;color:#fff;margin-bottom:8px}
+.card p{font-size:.83rem;line-height:1.75;color:var(--text2)}
+.card code{font-family:'Source Code Pro',monospace;background:rgba(10,132,59,.15);color:var(--g2);padding:1px 6px;border-radius:4px;font-size:.78rem}
+.token-demo{background:var(--gdd);border:1px solid var(--border2);border-radius:var(--r16);padding:22px 26px;margin:28px 0;position:relative;overflow:hidden;}
+.token-demo::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--g2),transparent);}
+.token-label{font-size:.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:12px;font-family:'Montserrat',sans-serif}
+.token-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.token-pill{padding:8px 18px;border-radius:24px;font-size:.78rem;font-weight:700;font-family:'Source Code Pro',monospace;letter-spacing:.3px;cursor:default;transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden;}
+.token-pill::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,transparent 100%)}
+.token-pill:hover{transform:translateY(-3px) scale(1.05)}
+.t-keyword{background:#0d4f25;color:#4ade80;border:1px solid #16a34a;box-shadow:0 0 12px rgba(74,222,128,.25)}
+.t-keyword:hover{box-shadow:0 0 20px rgba(74,222,128,.45)}
+.t-id{background:#0c2a4a;color:#60a5fa;border:1px solid #2563eb;box-shadow:0 0 12px rgba(96,165,250,.2)}
+.t-id:hover{box-shadow:0 0 20px rgba(96,165,250,.4)}
+.t-op{background:#4a2c06;color:#fbbf24;border:1px solid #d97706;box-shadow:0 0 12px rgba(251,191,36,.2)}
+.t-op:hover{box-shadow:0 0 20px rgba(251,191,36,.4)}
+.t-num{background:#4a1010;color:#f87171;border:1px solid #dc2626;box-shadow:0 0 12px rgba(248,113,113,.2)}
+.t-num:hover{box-shadow:0 0 20px rgba(248,113,113,.4)}
+.t-delim{background:#2e1a4a;color:#c084fc;border:1px solid #9333ea;box-shadow:0 0 12px rgba(192,132,252,.2)}
+.t-delim:hover{box-shadow:0 0 20px rgba(192,132,252,.4)}
+.t-string{background:#0a3d38;color:#34d399;border:1px solid #10b981;box-shadow:0 0 12px rgba(52,211,153,.2)}
+.t-string:hover{box-shadow:0 0 20px rgba(52,211,153,.4)}
+.tokenizer-input{width:100%;padding:14px 18px;font-family:'Source Code Pro',monospace;font-size:.88rem;background:var(--card2);border:1px solid var(--border2);border-radius:var(--r12);color:#fff;outline:none;margin-bottom:12px;transition:border-color .2s,box-shadow .2s;}
+.tokenizer-input:focus{border-color:var(--g2);box-shadow:0 0 0 3px rgba(10,132,59,.2)}
+.tokenizer-output{min-height:66px;background:var(--gdd);border-radius:var(--r12);padding:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;border:1px solid var(--border);margin-bottom:12px;}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:.72rem;color:var(--text2)}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+.match-type{font-size:.62rem;color:var(--text3);font-family:'Source Code Pro',monospace;line-height:1}
+.exercise-block{background:var(--card);border:1px solid var(--border);border-radius:var(--r16);padding:24px;margin-bottom:18px;position:relative;overflow:hidden;transition:border-color .3s;}
+.exercise-block:hover{border-color:var(--border2)}
+.exercise-block::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(to bottom,var(--g2),var(--gd));border-radius:3px 0 0 3px}
+.exercise-num{display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--g),var(--g2));color:#fff;border-radius:50%;width:28px;height:28px;font-weight:800;font-size:.8rem;margin-bottom:10px;box-shadow:0 0 12px rgba(10,132,59,.4);font-family:'Montserrat',sans-serif;}
+.exercise-block h4{font-family:'Montserrat',sans-serif;color:#fff;font-size:.9rem;margin-bottom:14px;line-height:1.5}
+.exercise-block code{font-family:'Source Code Pro',monospace;background:rgba(10,132,59,.15);color:var(--g2);padding:1px 6px;border-radius:4px;font-size:.82rem}
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.option-btn{padding:11px 14px;background:var(--card2);border:1px solid var(--border);border-radius:var(--r8);cursor:pointer;font-family:'Inter',sans-serif;font-size:.83rem;color:var(--text);text-align:left;transition:all .2s;}
+.option-btn:not(:disabled):hover{border-color:var(--g2);background:rgba(10,132,59,.1);color:#fff;transform:translateX(3px)}
+.option-btn.correct{border-color:#4ade80;background:rgba(74,222,128,.12);color:#4ade80;font-weight:600}
+.option-btn.wrong{border-color:#f87171;background:rgba(248,113,113,.1);color:#f87171}
+.feedback{display:none;padding:12px 16px;border-radius:var(--r8);font-size:.83rem;margin-top:10px;animation:slideDown .3s ease}
+@keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.feedback.show.ok{display:block;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:#4ade80;border-left:3px solid #4ade80}
+.feedback.show.fail{display:block;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:#f87171;border-left:3px solid #f87171}
+.info-box{background:var(--card2);border:1px solid var(--border);border-radius:var(--r16);padding:20px 24px;margin:20px 0;position:relative;overflow:hidden;}
+.info-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(10,132,59,.4),transparent)}
+.info-box h4{font-family:'Montserrat',sans-serif;color:var(--g2);font-size:.9rem;margin-bottom:10px;font-weight:700}
+.info-box ul{padding-left:16px;font-size:.84rem;line-height:2;color:var(--text2)}
+.info-box li::marker{color:var(--g2)}
+.er-table{width:100%;border-collapse:collapse;font-size:.82rem;margin:16px 0;border-radius:var(--r12);overflow:hidden}
+.er-table th{background:rgba(10,132,59,.3);color:var(--g2);padding:11px 14px;text-align:left;font-family:'Montserrat',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid var(--border2)}
+.er-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2)}
+.er-table tr:hover td{background:rgba(10,132,59,.06);color:var(--text)}
+.er-table code{font-family:'Source Code Pro',monospace;background:rgba(10,132,59,.15);color:var(--g2);padding:2px 7px;border-radius:4px;font-size:.78rem}
+.game-area{background:linear-gradient(135deg,var(--gdd) 0%,var(--bg3) 100%);border:1px solid var(--border2);border-radius:var(--r24);padding:30px;margin-top:36px;position:relative;overflow:hidden;}
+.game-area::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--g2),#39ff9e,var(--g2),transparent);box-shadow:0 0 20px var(--g2);}
+.game-area h3{font-family:'Montserrat',sans-serif;font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.game-area>p{font-size:.83rem;color:var(--text2);margin-bottom:20px}
+.game-tokens-pool{display:flex;flex-wrap:wrap;gap:8px;min-height:64px;background:rgba(0,0,0,.3);border-radius:var(--r12);padding:14px;margin-bottom:16px;border:1px solid var(--border);}
+.drag-token{padding:7px 16px;border-radius:24px;font-size:.78rem;font-weight:700;cursor:grab;user-select:none;font-family:'Source Code Pro',monospace;transition:transform .15s,box-shadow .2s;}
+.drag-token:hover{transform:scale(1.08)}
+.drag-token:active{cursor:grabbing}
+.drop-zones{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px}
+.drop-zone{background:rgba(0,0,0,.2);border:2px dashed rgba(10,132,59,.3);border-radius:var(--r12);padding:12px;min-height:100px;transition:all .2s;}
+.drop-zone.drag-over{border-color:var(--g2);background:rgba(10,132,59,.08);box-shadow:0 0 16px rgba(10,132,59,.2)}
+.drop-zone-label{font-size:.67rem;text-transform:uppercase;letter-spacing:1px;color:var(--g2);margin-bottom:8px;font-weight:700;font-family:'Montserrat',sans-serif}
+.drop-zone .dropped{display:flex;flex-wrap:wrap;gap:4px}
+.score-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(10,132,59,.2);border:1px solid var(--border2);color:var(--g2);padding:5px 16px;border-radius:20px;font-weight:700;font-size:.8rem;font-family:'Montserrat',sans-serif;box-shadow:0 0 10px rgba(10,132,59,.2);}
+.btn-verde{background:linear-gradient(135deg,var(--g),var(--g2));color:#fff;border:none;padding:11px 24px;border-radius:var(--r8);font-family:'Montserrat',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s;letter-spacing:.3px;box-shadow:0 0 20px rgba(10,132,59,.3);}
+.btn-verde:hover{box-shadow:0 0 28px rgba(10,132,59,.5);transform:translateY(-1px)}
+.btn-verde:active{transform:translateY(0)}
+.btn-outline{background:transparent;color:var(--gc);border:1px solid var(--border2);padding:11px 24px;border-radius:var(--r8);font-family:'Montserrat',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;margin-left:10px;transition:all .2s;letter-spacing:.3px;}
+.btn-outline:hover{background:rgba(10,132,59,.15);border-color:var(--g2);color:#fff}
+#tg-token{font-family:'Source Code Pro',monospace;font-size:2.5rem;color:#fff;text-align:center;padding:24px;background:rgba(0,0,0,.4);border-radius:var(--r12);margin:18px 0;letter-spacing:3px;border:1px solid var(--border2);text-shadow:0 0 30px rgba(10,132,59,.5);transition:all .3s;}
+#tg-options{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.eval-progress{background:rgba(0,0,0,.3);border-radius:4px;height:6px;margin-bottom:28px;overflow:hidden;border:1px solid var(--border);}
+.eval-progress-bar{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--g),var(--g2));transition:width .5s cubic-bezier(.4,0,.2,1);box-shadow:0 0 12px var(--g2);}
+.eval-question{display:none}
+.eval-question.active{display:block;animation:sectionIn .35s ease}
+.eval-q-text{font-family:'Montserrat',sans-serif;font-size:1rem;font-weight:700;color:#fff;margin-bottom:18px;padding:18px 22px;background:var(--card);border-radius:var(--r12);border:1px solid var(--border);border-left:3px solid var(--g2);box-shadow:0 0 20px rgba(10,132,59,.1);line-height:1.5;}
+.eval-options{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.eval-option{padding:13px 18px;background:var(--card2);border:1px solid var(--border);border-radius:var(--r8);cursor:pointer;font-size:.88rem;color:var(--text);text-align:left;font-family:'Inter',sans-serif;transition:all .2s;}
+.eval-option:not(:disabled):hover{border-color:var(--g2);background:rgba(10,132,59,.1);color:#fff;transform:translateX(4px)}
+.eval-option.sel-correct{border-color:#4ade80;background:rgba(74,222,128,.1);color:#4ade80;font-weight:600}
+.eval-option.sel-wrong{border-color:#f87171;background:rgba(248,113,113,.1);color:#f87171}
+.eval-option.show-correct{border-color:#4ade80;background:rgba(74,222,128,.06)}
+.eval-result{display:none;text-align:center;padding:48px 24px}
+.eval-result.show{display:block;animation:sectionIn .5s ease}
+.result-score{font-family:'Montserrat',sans-serif;font-size:4rem;font-weight:900;background:linear-gradient(135deg,var(--g2),#39ff9e);background-clip:text;-webkit-background-clip:text;color:transparent;margin:16px 0 8px;text-shadow:none;}
+.result-msg{font-size:1rem;color:var(--text2);margin-bottom:28px;line-height:1.6}
+.trophy{font-size:4rem;margin-bottom:8px;display:block;animation:bounce .6s ease}
+@keyframes bounce{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
+.flow-viz{display:flex;flex-wrap:wrap;align-items:center;gap:6px;background:var(--gdd);border:1px solid var(--border);border-radius:var(--r16);padding:22px;margin:20px 0;justify-content:center;}
+.flow-node{background:rgba(10,132,59,.2);color:var(--g2);padding:9px 18px;border-radius:var(--r8);font-size:.78rem;font-family:'Montserrat',sans-serif;font-weight:700;border:1px solid var(--border2);letter-spacing:.3px;transition:all .3s;}
+.flow-node:hover{background:rgba(10,132,59,.35);box-shadow:0 0 16px rgba(10,132,59,.3);color:#fff}
+.flow-node.active-node{background:rgba(10,132,59,.4);border-color:var(--g2);color:#fff;box-shadow:0 0 16px rgba(10,132,59,.4)}
+.flow-arrow{color:var(--text3);font-size:1.1rem;flex-shrink:0}
+.confetti-container{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden}
+.confetti-piece{position:absolute;width:8px;height:8px;border-radius:2px;animation:confettiFall linear forwards;}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+footer{background:var(--gdd);border-top:1px solid var(--border);text-align:center;padding:28px;font-size:.78rem;color:var(--text2);position:relative;z-index:1;}
+footer strong{color:var(--g2);font-weight:600}
+footer .f-credits{margin-top:6px;font-size:.7rem;color:var(--text3)}
+@media(max-width:640px){
+  .options-grid{grid-template-columns:1fr}
+  #tg-options{grid-template-columns:1fr 1fr}
+  .drop-zones{grid-template-columns:1fr 1fr}
+  .hero h2{font-size:1.8rem}
+  .header-author{display:none}
+}
+</style>
+</head>
+<body>
+
+<canvas id="particle-canvas"></canvas>
+<div class="confetti-container" id="confetti-container"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-usb" style="background:none;border:none;padding:0;overflow:hidden;">
+      <img src="/logo_u.png" style="width:50px;height:50px;object-fit:cover;border-radius:50%;" alt="USB">
+    </div>
+    <div class="header-text">
+      <h1>OVA — Análisis Léxico &amp; Tokens</h1>
+      <p>Teoría de Compiladores · Ingeniería de Sistemas · 2026</p>
+    </div>
+    <div class="header-author">
+      Desarrollado por<br>
+      <strong>Johan H. Villegas Cañizares</strong>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <ul id="nav-menu">
+    <li><a href="#" class="nav-link active" data-section="inicio">🏠 Inicio</a></li>
+    <li><a href="#" class="nav-link" data-section="lexico">📖 Léxico</a></li>
+    <li><a href="#" class="nav-link" data-section="tokens">🔖 Tokens</a></li>
+    <li><a href="#" class="nav-link" data-section="er">🔣 Expr. Regulares</a></li>
+    <li><a href="#" class="nav-link" data-section="analizador">⚙️ Analizador</a></li>
+    <li><a href="#" class="nav-link" data-section="evaluacion">📝 Evaluación</a></li>
+  </ul>
+</nav>
+
+<div class="hero" id="hero-section">
+  <div class="hero-badge"><span></span>Universidad Simón Bolívar</div>
+  <h2>Aprende <span class="accent">Análisis Léxico</span><br>desde cero</h2>
+  <p>Explora tokens, expresiones regulares y compiladores de forma visual, interactiva y entretenida.</p>
+  <div class="typewriter-wrap">
+    <div class="tw-bar">
+      <div class="tw-dot r"></div><div class="tw-dot y"></div><div class="tw-dot g"></div>
+      <div class="tw-title">analizador_lexico.c</div>
+    </div>
+    <div class="tw-body">
+      <div id="tw-output"></div><span class="tw-cursor"></span>
+      <div class="token-result-row" id="tw-tokens"></div>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ── INICIO ── -->
+<div id="inicio" class="section active">
+  <div class="section-title">Bienvenido a la OVA</div>
+  <p class="section-sub">Navega por cada tema · 3 ejercicios + 1 juego por sección · Evaluación final de 10 preguntas</p>
+  <div class="content-grid">
+    <div class="card"><div class="card-icon">📖</div><h3>Concepto Léxico</h3><p>Reglas y convenciones del lenguaje. Lexemas, patrones y su rol en la primera fase del compilador. Por Kevin García.</p></div>
+    <div class="card"><div class="card-icon">🔖</div><h3>Tokens y Clasificación</h3><p>Palabras clave, identificadores, literales, operadores y delimitadores. Anatomía interna de un token. Por Sofi Galvis &amp; Fabián Jaimes.</p></div>
+    <div class="card"><div class="card-icon">🔣</div><h3>Expresiones Regulares</h3><p>Notación algebraica para describir patrones. De ER a NFA a DFA. Herramientas Lex/Flex. Por Joel Pineda Rincón.</p></div>
+    <div class="card"><div class="card-icon">⚙️</div><h3>Analizador Léxico</h3><p>El scanner: función, flujo de compilación, tabla de símbolos, errores léxicos y su rol como interfaz del compilador.</p></div>
+  </div>
+  <div class="info-box">
+    <h4>📌 Cómo usar esta OVA</h4>
+    <ul>
+      <li>Usa el menú superior para navegar entre temas</li>
+      <li>Lee la teoría y experimenta con el <strong>tokenizador interactivo</strong></li>
+      <li>Responde los <strong>3 ejercicios</strong> de práctica de cada tema</li>
+      <li>Juega el <strong>minijuego</strong> para reforzar lo aprendido</li>
+      <li>Al final, completa la <strong>Evaluación</strong> de 10 preguntas</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── LÉXICO ── -->
+<div id="lexico" class="section">
+  <div class="section-title">Concepto Léxico y Tokens</div>
+  <p class="section-sub">Presentado por Kevin García · Clasificación y estructura de los tokens en compiladores</p>
+  <div class="content-grid">
+    <div class="card"><div class="card-icon">🔤</div><h3>¿Qué es el Concepto Léxico?</h3><p>Constituye la base de la primera fase de un compilador. Define el conjunto de reglas que determinan qué secuencias de caracteres son válidas dentro de un lenguaje de programación.</p></div>
+    <div class="card"><div class="card-icon">🧩</div><h3>Lexemas</h3><p>Los patrones formales —representados mediante expresiones regulares— permiten agrupar los caracteres del código fuente en unidades con significado lógico llamadas <strong>lexemas</strong>.</p></div>
+    <div class="card"><div class="card-icon">🏷️</div><h3>Token vs Lexema vs Patrón</h3><p><strong style="color:var(--g2)">Token:</strong> la categoría. <strong style="color:#60a5fa">Lexema:</strong> el valor real. <strong style="color:#fbbf24">Patrón:</strong> la regla regex. Ej: Token=ID, Lexema="edad", Patrón=<code>[a-zA-Z_][a-zA-Z0-9_]*</code></p></div>
+  </div>
+
+  <div class="token-demo">
+    <div class="token-label">Ejemplo · Código: int x = 10;</div>
+    <div class="token-row">
+      <span class="token-pill t-keyword">int → KEYWORD</span>
+      <span class="token-pill t-id">x → IDENTIFIER</span>
+      <span class="token-pill t-op">= → OPERATOR</span>
+      <span class="token-pill t-num">10 → LITERAL</span>
+      <span class="token-pill t-delim">; → DELIMITER</span>
+    </div>
+  </div>
+
+  <h3 style="font-family:Montserrat,sans-serif;color:var(--g2);margin:28px 0 12px;font-size:1.05rem;font-weight:700;letter-spacing:.3px">🖱️ Tokenizador Interactivo en Tiempo Real</h3>
+  <p style="font-size:.83rem;color:var(--text2);margin-bottom:10px">Escribe una sentencia de código y mira cómo se tokeniza al instante:</p>
+  <input class="tokenizer-input" id="tok-input" type="text" value="int suma = a + b;" placeholder="Escribe código aquí...">
+  <div class="tokenizer-output" id="tok-output"></div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#4ade80"></div>Palabra reservada</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div>Identificador</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>Operador</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f87171"></div>Número</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#c084fc"></div>Delimitador</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#34d399"></div>Cadena</div>
+  </div>
+
+  <h3 style="font-family:Montserrat,sans-serif;color:var(--g2);margin:36px 0 16px;font-size:1.05rem;font-weight:700">✏️ Ejercicios de Práctica</h3>
+
+  <div class="exercise-block">
+    <div class="exercise-num">1</div>
+    <h4>¿Cuál es el lexema del token KEYWORD en la sentencia: <code>while (i &lt; 10)</code>?</h4>
+    <div class="options-grid">
+      <button class="option-btn" onclick="checkAnswer(this,'lex1')">a) i</button>
+      <button class="option-btn" onclick="checkAnswer(this,'lex1')" data-correct="true">b) while</button>
+      <button class="option-btn" onclick="checkAnswer(this,'lex1')">c) 10</button>
+      <button class="option-btn" onclick="checkAnswer(this,'lex1')">d) (</button>
+    </div>
+    <div class="feedback" id="lex1-ok">✅ ¡Correcto! "while" es una palabra reservada cuyo lexema es exactamente la cadena "while".</div>
+    <div class="feedback" id="lex1-fail">❌ El lexema es el valor literal en el código. "while" es la palabra reservada.</div>
+  </div>
+
+  <div class="exercise-block">
+    <div class="exercise-num">2</div>
+    <h4>¿Cuántos tokens tiene la sentencia: <code>float y = 3.14;</code>?</h4>
+    <div class="options-grid">
+      <button class="option-btn" onclick="checkAnswer(this,'lex2')">a) 3</button>
+      <button class="option-btn" onclick="checkAnswer(this,'lex2')">b) 4</button>
+      <button class="option-btn" onclick="checkAnswer(this,'lex2')" data-correct="true">c) 5</button>
+      <button class="option-btn" onclick="checkAnswer(this,'lex2')">d) 6</button>
+    </div>
+    <div class="feedback" id="lex2-ok">✅ ¡Correcto! Los 5 tokens son: float(KW) · y(ID) · =(OP) · 3.14(NUM) · ;(DELIM)</div>
+    <div class="feedback" id="lex2-fail">❌ Cuenta cada elemento con significado: float, y, =, 3.14, ; = 5 tokens.</div>
+  </div>
+
+  <div class="exercise-block">
+    <div class="exercise-num">3</div>
+    <h4>¿Cuál de estas opciones es un ejemplo de LEXEMA?</h4>
+    <div class="options-grid">
+      <button class="option-btn" onclick="checkAnswer(this,'lex3')">a) IDENTIFICADOR</button>
+      <button class="option-btn" onclick="checkAnswer(this,'lex3')" data-correct="true">b) miVariable</button>
+      <button class="option-btn" onclick="checkAnswer(this,'lex3')">c) [a-zA-Z_]+</button>
+      <button class="option-btn" onclick="checkAnswer(this,'lex3')">d) KEYWORD</button>
+    </div>
+    <div class="feedback" id="lex3-ok">✅ ¡Correcto! "miVariable" es el lexema: el valor real que aparece en el código fuente.</div>
+    <div class="feedback" id="lex3-fail">❌ El lexema es lo que literalmente escribes. Las otras opciones son tipos de token o patrones regex.</div>
+  </div>
+
+  <!-- JUEGO DRAG & DROP -->
+  <div class="game-area">
+    <h3>🎮 Juego: Clasifica los Tokens</h3>
+    <p>Arrastra cada elemento a su categoría correcta. ¡Consigue el puntaje perfecto!</p>
+    <div class="token-label">ELEMENTOS A CLASIFICAR:</div>
+    <div class="game-tokens-pool" id="pool-lexico">
+      <span class="drag-token t-keyword" draggable="true" data-type="keyword">for</span>
+      <span class="drag-token t-id" draggable="true" data-type="id">total</span>
+      <span class="drag-token t-num" draggable="true" data-type="literal">42</span>
+      <span class="drag-token t-op" draggable="true" data-type="op">!=</span>
+      <span class="drag-token t-delim" draggable="true" data-type="delim">{</span>
+      <span class="drag-token t-keyword" draggable="true" data-type="keyword">return</span>
+      <span class="drag-token t-string" draggable="true" data-type="literal">"hola"</span>
+      <span class="drag-token t-id" draggable="true" data-type="id">suma</span>
+    </div>
+    <div class="drop-zones">
+      <div class="drop-zone" data-accepts="keyword"><div class="drop-zone-label">📌 Palabras Reservadas</div><div class="dropped" id="dz-keyword"></div></div>
+      <div class="drop-zone" data-accepts="id"><div class="drop-zone-label">🔵 Identificadores</div><div class="dropped" id="dz-id"></div></div>
+      <div class="drop-zone" data-accepts="literal"><div class="drop-zone-label">🔴 Literales</div><div class="dropped" id="dz-literal"></div></div>
+      <div class="drop-zone" data-accepts="op"><div class="drop-zone-label">🟡 Operadores</div><div class="dropped" id="dz-op"></div></div>
+      <div class="drop-zone" data-accepts="delim"><div class="drop-zone-label">🟣 Delimitadores</div><div class="dropped" id="dz-delim"></div></div>
+    </div>
+    <button class="btn-verde" onclick="checkDragGame()">✓ Verificar</button>
+    <button class="btn-outline" onclick="resetDragGame()">↺ Reiniciar</button>
+    <div id="drag-result" style="margin-top:14px;font-size:.9rem"></div>
+  </div>
+</div>
+
+<!-- ── TOKENS ── -->
+<div id="tokens" class="section">
+  <div class="section-title">Definición e Implementación de Tokens</div>
+  <p class="section-sub">Presentado por Sofi Galvis y Fabián Jaimes · Tipos, anatomía y clasificación</p>
+  <div class="content-grid">
+    <div class="card"><div class="card-icon">🔑</div><h3>Palabras Reservadas</h3><p>Términos predefinidos con significado fijo. No pueden usarse como identificadores. Se verifican ANTES que cualquier otro patrón. Ej: <em>if, while, int, return</em></p></div>
+    <div class="card"><div class="card-icon">🆔</div><h3>Identificadores</h3><p>Nombres definidos por el programador. Deben iniciar con letra o guion bajo. Se registran en la tabla de símbolos. Patrón: <code>[a-zA-Z_][a-zA-Z0-9_]*</code></p></div>
+    <div class="card"><div class="card-icon">🔢</div><h3>Literales / Constantes</h3><p>Valores constantes en el código. Tipos: enteros (42), reales (3.14), cadenas ("hola"), booleanos (true/false). El token lleva el valor consigo.</p></div>
+    <div class="card"><div class="card-icon">➕</div><h3>Operadores</h3><p>Símbolos para operaciones: aritméticos (+,-,*,/), relacionales (==,!=), lógicos (&amp;&amp;,||,!). Regla Maximal Munch: == antes que =.</p></div>
+    <div class="card"><div class="card-icon">📍</div><h3>Delimitadores</h3><p>Estructuran y separan unidades del programa. No realizan operaciones. Ejemplos: ( ) { } [ ] ; ,</p></div>
+    <div class="card"><div class="card-icon">📊</div><h3>Estructura Interna</h3><p>Representación: <strong style="color:var(--g2)">&lt;tipo, valor&gt;</strong><br>&lt;KEYWORD,"int"&gt; · &lt;IDENTIFIER,"x"&gt; · &lt;OPERATOR,"="&gt; · &lt;LITERAL,10&gt; · &lt;DELIMITER,";"&gt;</p></div>
+  </div>
+
+  <div class="info-box">
+    <h4>📋 Tabla de Símbolos</h4>
+    <ul>
+      <li>Almacena nombre, tipo, ámbito y dirección de memoria de los identificadores</li>
+      <li>Se construye durante el análisis léxico y sintáctico</li>
+      <li>KEYWORD / OPERATOR / DELIMITER <strong>no</strong> requieren entrada en la tabla</li>
+      <li>Los identificadores siempre se registran con un puntero a la tabla</li>
+    </ul>
+  </div>
+
+  <h3 style="font-family:Montserrat,sans-serif;color:var(--g2);margin:28px 0 16px;font-size:1.05rem;font-weight:700">✏️ Ejercicios de Práctica</h3>
+
+  <div class="exercise-block">
+    <div class="exercise-num">1</div>
+    <h4>En la sentencia <code>if (edad >= 18)</code>, ¿qué tipo de token es <code>>=</code>?</h4>
+    <div class="options-grid">
+      <button class="option-btn" onclick="checkAnswer(this,'tok1')">a) Palabra reservada</button>
+      <button class="option-btn" onclick="checkAnswer(this,'tok1')" data-correct="true">b) Operador relacional</button>
+      <button class="option-btn" onclick="checkAnswer(this,'tok1')">c) Delimitador</button>
+      <button class="option-btn" onclick="checkAnswer(this,'tok1')">d) Identificador</button>
+    </div>
+    <div class="feedback" id="tok1-ok">✅ ¡Correcto! ">=" es un operador relacional. Por Maximal Munch se reconoce como un solo token, no como ">"+"=".</div>
+    <div class="feedback" id="tok1-fail">❌ ">=" es un operador relacional (mayor o igual). No es keyword, delimitador ni identificador.</div>
+  </div>
+
+  <div class="exercise-block">
+    <div class="exercise-num">2</div>
+    <h4>¿Cuál de los siguientes identificadores es INVÁLIDO en C/Java?</h4>
+    <div class="options-grid">
+      <button class="option-btn" onclick="checkAnswer(this,'tok2')">a) _miVar</button>
+      <button class="option-btn" onclick="checkAnswer(this,'tok2')" data-correct="true">b) 2suma</button>
+      <button class="option-btn" onclick="checkAnswer(this,'tok2')">c) miVariable2</button>
+      <button class="option-btn" onclick="checkAnswer(this,'tok2')">d) sumaTotal</button>
+    </div>
+    <div class="feedback" id="tok2-ok">✅ ¡Correcto! Los identificadores no pueden comenzar con un dígito. El patrón exige letra o _ al inicio.</div>
+    <div class="feedback" id="tok2-fail">❌ El inválido es "2suma": inicia con número. Los identificadores deben comenzar con letra o guion bajo.</div>
+  </div>
+
+  <div class="exercise-block">
+    <div class="exercise-num">3</div>
+    <h4>¿Qué tipo de token es <code>"Hola Mundo"</code> en el código?</h4>
+    <div class="options-grid">
+      <button class="option-btn" onclick="checkAnswer(this,'tok3')">a) Identificador</button>
+      <button class="option-btn" onclick="checkAnswer(this,'tok3')">b) Palabra reservada</button>
+      <button class="option-btn" onclick="checkAnswer(this,'tok3')" data-correct="true">c) Literal de cadena</button>
+      <button class="option-btn" onclick="checkAnswer(this,'tok3')">d) Delimitador</button>
+    </div>
+    <div class="feedback" id="tok3-ok">✅ ¡Correcto! Texto entre comillas dobles = literal de cadena (STRING). Patrón: <code>"[^"\n]*"</code></div>
+    <div class="feedback" id="tok3-fail">❌ Todo texto entre comillas dobles es un literal de cadena (STRING literal).</div>
+  </div>
+
+  <!-- JUEGO TOKEN TYPE -->
+  <div class="game-area">
+    <h3>🎮 Juego: ¿Qué tipo de token es?</h3>
+    <p>Identifica el tipo de token correcto. ¡10 rondas, a la mayor velocidad!</p>
+    <div id="tg-token">—</div>
+    <div id="tg-options"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span id="tg-score" class="score-badge">⭐ Puntos: 0</span>
+      <span id="tg-round" style="font-size:.78rem;color:var(--text3)">Ronda 1/10</span>
+    </div>
+    <button class="btn-verde" id="tg-start" onclick="startTokenGame()" style="margin-top:16px;width:100%">▶ Iniciar Juego</button>
+    <div id="tg-result" style="display:none;text-align:center;padding:20px">
+      <div style="font-size:1.3rem;color:var(--g2);font-family:Montserrat,sans-serif;font-weight:800;margin-bottom:8px">¡Juego terminado!</div>
+      <div id="tg-final-score" style="font-size:2.8rem;color:#fff;font-weight:900;font-family:Montserrat,sans-serif"></div>
+      <button class="btn-outline" onclick="resetTokenGame()" style="margin-top:14px">↺ Jugar de nuevo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ER ── -->
+<div id="er" class="section">
+  <div class="section-title">Expresiones Regulares</div>
+  <p class="section-sub">Presentado por Joel Steven Pineda Rincón · Aplicación en Analizadores Léxicos · USB 2026</p>
+  <div class="content-grid">
+    <div class="card"><div class="card-icon">∑</div><h3>Definición Formal</h3><p>Una ER es una notación algebraica para describir conjuntos de cadenas sobre un alfabeto Σ. Cada ER define un Lenguaje Regular reconocible por un Autómata Finito.</p></div>
+    <div class="card"><div class="card-icon">⚡</div><h3>Propiedades Clave</h3><p>Son el formalismo matemático base para los patrones léxicos. Se transforman mecánicamente en DFA que reconocen tokens en tiempo lineal O(n).</p></div>
+    <div class="card"><div class="card-icon">🔧</div><h3>Herramientas: Lex/Flex</h3><p>Generan automáticamente analizadores léxicos a partir de ER. Flujo: escribir <code>.l</code> → <code>flex archivo.l</code> → <code>gcc lex.yy.c</code></p></div>
+  </div>
+
+  <h3 style="font-family:Montserrat,sans-serif;color:var(--g2);margin:28px 0 12px;font-size:1.05rem;font-weight:700">📋 Operadores Fundamentales</h3>
+  <table class="er-table">
+    <tr><th>Operador</th><th>Símbolo</th><th>Significado</th><th>Ejemplo</th></tr>
+    <tr><td>Cierre de Kleene</td><td><code>r*</code></td><td>0 o más repeticiones</td><td><code>a*</code> → ε, a, aa...</td></tr>
+    <tr><td>Cierre positivo</td><td><code>r+</code></td><td>1 o más repeticiones</td><td><code>a+</code> → a, aa, aaa...</td></tr>
+    <tr><td>Opcionalidad</td><td><code>r?</code></td><td>0 o 1 aparición</td><td><code>a?</code> → ε o a</td></tr>
+    <tr><td>Unión</td><td><code>r|s</code></td><td>r o s</td><td><code>a|b</code> → a o b</td></tr>
+    <tr><td>Clase carácter</td><td><code>[abc]</code></td><td>Cualquiera del conjunto</td><td><code>[aeiou]</code> → vocal</td></tr>
+    <tr><td>Rango</td><td><code>[a-z]</code></td><td>Rango de caracteres</td><td><code>[0-9]</code> → dígito</td></tr>
+    <tr><td>Negación</td><td><code>[^a]</code></td><td>Cualquiera excepto a</td><td><code>[^0-9]</code> → no dígito</td></tr>
+  </table>
+
+  <h3 style="font-family:Montserrat,sans-serif;color:var(--g2);margin:24px 0 12px;font-size:1.05rem;font-weight:700">🔖 Patrones por tipo de Token</h3>
+  <table class="er-table">
+    <tr><th>Token</th><th>Expresión Regular</th><th>Descripción</th></tr>
+    <tr><td>Identificador</td><td><code>[a-zA-Z_][a-zA-Z0-9_]*</code></td><td>Letra/_ seguida de letras, dígitos o _</td></tr>
+    <tr><td>Entero</td><td><code>[0-9]+</code></td><td>Uno o más dígitos</td></tr>
+    <tr><td>Real</td><td><code>[0-9]+\.[0-9]+</code></td><td>Entero + punto + fracción</td></tr>
+    <tr><td>Cadena</td><td><code>"[^"\n]*"</code></td><td>Caracteres entre comillas</td></tr>
+    <tr><td>Palabra reservada</td><td><code>if|else|while|for|int</code></td><td>Alternativas fijas — mayor prioridad</td></tr>
+    <tr><td>Op. relacional</td><td><code>==|!=|&lt;=|&gt;=|[&lt;&gt;]</code></td><td>De más largo a más corto (Maximal Munch)</td></tr>
+  </table>
+
+  <div class="info-box">
+    <h4>🔄 Pipeline: De ER a Autómata Ejecutable</h4>
+    <ul>
+      <li><strong style="color:var(--g2)">Paso 1:</strong> Expresión Regular → definición formal del patrón léxico</li>
+      <li><strong style="color:var(--g2)">Paso 2:</strong> ER → NFA mediante el Algoritmo de Thompson</li>
+      <li><strong style="color:var(--g2)">Paso 3:</strong> NFA → DFA mediante la construcción de subconjuntos</li>
+      <li><strong style="color:var(--g2)">Paso 4:</strong> DFA → DFA Minimizado con el Algoritmo de Hopcroft</li>
+      <li><strong>Resultado:</strong> Scanner determinista en tiempo lineal O(n)</li>
+    </ul>
+  </div>
+
+  <h3 style="font-family:Montserrat,sans-serif;color:var(--g2);margin:28px 0 16px;font-size:1.05rem;font-weight:700">✏️ Ejercicios de Práctica</h3>
+
+  <div class="exercise-block">
+    <div class="exercise-num">1</div>
+    <h4>¿Cuál ER reconoce correctamente un identificador válido en C?</h4>
+    <div class="options-grid">
+      <button class="option-btn" onclick="checkAnswer(this,'er1')" style="font-family:'Source Code Pro',monospace;font-size:.78rem">a) [0-9][a-zA-Z]*</button>
+      <button class="option-btn" onclick="checkAnswer(this,'er1')" data-correct="true" style="font-family:'Source Code Pro',monospace;font-size:.78rem">b) [a-zA-Z_][a-zA-Z0-9_]*</button>
+      <button class="option-btn" onclick="checkAnswer(this,'er1')" style="font-family:'Source Code Pro',monospace;font-size:.78rem">c) [a-z]+[0-9]*</button>
+      <button class="option-btn" onclick="checkAnswer(this,'er1')" style="font-family:'Source Code Pro',monospace;font-size:.78rem">d) [a-zA-Z]+</button>
+    </div>
+    <div class="feedback" id="er1-ok">✅ ¡Correcto! Comienza con letra o _, luego permite letras, dígitos o _ en cualquier cantidad.</div>
+    <div class="feedback" id="er1-fail">❌ La ER correcta es [a-zA-Z_][a-zA-Z0-9_]* — debe iniciar con letra o _ y puede incluir dígitos después.</div>
+  </div>
+
+  <div class="exercise-block">
+    <div class="exercise-num">2</div>
+    <h4>El operador <code>*</code> en una ER significa:</h4>
+    <div class="options-grid">
+      <button class="option-btn" onclick="checkAnswer(this,'er2')">a) Exactamente una vez</button>
+      <button class="option-btn" onclick="checkAnswer(this,'er2')">b) Una o más veces</button>
+      <button class="option-btn" onclick="checkAnswer(this,'er2')" data-correct="true">c) Cero o más veces</button>
+      <button class="option-btn" onclick="checkAnswer(this,'er2')">d) Cero o una vez</button>
+    </div>
+    <div class="feedback" id="er2-ok">✅ ¡Correcto! Cierre de Kleene (*) = 0 o más. "Una o más" es +. "Cero o una" es ?</div>
+    <div class="feedback" id="er2-fail">❌ El * (Cierre de Kleene) significa 0 o más repeticiones. El + es una o más, ? es cero o una.</div>
+  </div>
+
+  <div class="exercise-block">
+    <div class="exercise-num">3</div>
+    <h4>Ante la entrada "==", ¿qué principio aplica el analizador léxico?</h4>
+    <div class="options-grid">
+      <button class="option-btn" onclick="checkAnswer(this,'er3')">a) Reconoce dos tokens "=" + "="</button>
+      <button class="option-btn" onclick="checkAnswer(this,'er3')" data-correct="true">b) Maximal Munch: un token "=="</button>
+      <button class="option-btn" onclick="checkAnswer(this,'er3')">c) Genera un error léxico</button>
+      <button class="option-btn" onclick="checkAnswer(this,'er3')">d) Ignora el segundo "="</button>
+    </div>
+    <div class="feedback" id="er3-ok">✅ ¡Correcto! Maximal Munch: consume la secuencia más larga posible → un solo token "==".</div>
+    <div class="feedback" id="er3-fail">❌ Maximal Munch hace que "==" sea un único token de igualdad, no dos tokens "=".</div>
+  </div>
+
+  <!-- JUEGO ER -->
+  <div class="game-area">
+    <h3>🎮 Juego: Constructor de Expresiones Regulares</h3>
+    <p>Elige la ER correcta para cada patrón descrito. Tienes ❤️ ❤️ ❤️ vidas.</p>
+    <div id="er-lives" style="font-size:1.3rem;margin-bottom:12px">❤️ ❤️ ❤️</div>
+    <div id="er-prompt" style="background:rgba(0,0,0,.3);padding:16px;border-radius:var(--r12);margin-bottom:14px;font-size:.88rem;color:var(--text2);border:1px solid var(--border);min-height:50px">Presiona Iniciar para comenzar</div>
+    <div id="er-options-game" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px"></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span id="er-score" class="score-badge">⭐ Puntos: 0</span>
+      <span id="er-round-g" style="font-size:.78rem;color:var(--text3)">0/5 completadas</span>
+    </div>
+    <button class="btn-verde" id="er-start-btn" onclick="startERGame()" style="margin-top:16px;width:100%">▶ Iniciar Juego</button>
+  </div>
+</div>
+
+<!-- ── ANALIZADOR ── -->
+<div id="analizador" class="section">
+  <div class="section-title">Analizador Léxico</div>
+  <p class="section-sub">Presentado por Fabián Jaimes · Función de Análisis Léxico en los Compiladores</p>
+  <div class="content-grid">
+    <div class="card"><div class="card-icon">📖</div><h3>Leer caracteres</h3><p>El scanner lee el código fuente carácter por carácter, siendo la primera fase del compilador.</p></div>
+    <div class="card"><div class="card-icon">🧩</div><h3>Agrupar en tokens</h3><p>Agrupa secuencias en tokens con significado. Elimina espacios en blanco, comentarios y caracteres irrelevantes para la gramática.</p></div>
+    <div class="card"><div class="card-icon">🔍</div><h3>Detectar errores</h3><p>Identifica errores léxicos cuando encuentra caracteres que no coinciden con ningún patrón definido del lenguaje.</p></div>
+    <div class="card"><div class="card-icon">➡️</div><h3>Entregar al sintáctico</h3><p>Provee la secuencia de tokens al analizador sintáctico, actuando como interfaz entre el texto crudo y las fases superiores.</p></div>
+  </div>
+
+  <h3 style="font-family:Montserrat,sans-serif;color:var(--g2);margin:28px 0 14px;font-size:1.05rem;font-weight:700">⚡ Flujo del Compilador</h3>
+  <div class="flow-viz">
+    <div class="flow-node active-node">Código Fuente</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node" style="border-color:var(--g2);color:var(--g2);background:rgba(10,132,59,.3)">Análisis Léxico ★</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">Tokens</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">Análisis Sintáctico</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">Análisis Semántico</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">Generación Código</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">Código Máquina</div>
+  </div>
+
+  <div class="info-box">
+    <h4>🚨 Errores Léxicos Comunes</h4>
+    <ul>
+      <li><strong>Símbolo inválido:</strong> <code>int x = 10 @;</code> — el @ no pertenece al lenguaje</li>
+      <li><strong>ID mal formado:</strong> <code>int 1variable = 5;</code> — no puede iniciar con número</li>
+      <li><strong>Número inválido:</strong> <code>float x = 12.3.4;</code> — múltiples puntos decimales</li>
+      <li><strong>Cadena sin cerrar:</strong> <code>printf("Hola mundo);</code> — falta la comilla de cierre</li>
+      <li><strong>Carácter especial:</strong> <code>int #valor = 10;</code> — # no es válido en un identificador</li>
+    </ul>
+  </div>
+
+  <h3 style="font-family:Montserrat,sans-serif;color:var(--g2);margin:28px 0 16px;font-size:1.05rem;font-weight:700">✏️ Ejercicios de Práctica</h3>
+
+  <div class="exercise-block">
+    <div class="exercise-num">1</div>
+    <h4>¿Cuál de las siguientes sentencias contiene un ERROR LÉXICO?</h4>
+    <div class="options-grid">
+      <button class="option-btn" onclick="checkAnswer(this,'an1')" style="font-family:'Source Code Pro',monospace;font-size:.78rem">a) int x = 5;</button>
+      <button class="option-btn" onclick="checkAnswer(this,'an1')" data-correct="true" style="font-family:'Source Code Pro',monospace;font-size:.78rem">b) float 3y = 2.5;</button>
+      <button class="option-btn" onclick="checkAnswer(this,'an1')" style="font-family:'Source Code Pro',monospace;font-size:.78rem">c) return total;</button>
+      <button class="option-btn" onclick="checkAnswer(this,'an1')" style="font-family:'Source Code Pro',monospace;font-size:.78rem">d) suma += 10;</button>
+    </div>
+    <div class="feedback" id="an1-ok">✅ ¡Correcto! "3y" es inválido: no puede comenzar con un dígito. El analizador léxico lo detectaría como error.</div>
+    <div class="feedback" id="an1-fail">❌ "float 3y = 2.5;" contiene el error léxico: "3y" inicia con número.</div>
+  </div>
+
+  <div class="exercise-block">
+    <div class="exercise-num">2</div>
+    <h4>¿Qué hace el analizador léxico con los espacios en blanco y comentarios?</h4>
+    <div class="options-grid">
+      <button class="option-btn" onclick="checkAnswer(this,'an2')">a) Los convierte en tokens especiales</button>
+      <button class="option-btn" onclick="checkAnswer(this,'an2')" data-correct="true">b) Los elimina / ignora</button>
+      <button class="option-btn" onclick="checkAnswer(this,'an2')">c) Los envía al analizador sintáctico</button>
+      <button class="option-btn" onclick="checkAnswer(this,'an2')">d) Genera un error léxico</button>
+    </div>
+    <div class="feedback" id="an2-ok">✅ ¡Correcto! El analizador léxico elimina espacios, tabuladores y comentarios. No aportan información semántica.</div>
+    <div class="feedback" id="an2-fail">❌ Los espacios y comentarios son descartados. No tienen significado en la gramática del lenguaje.</div>
+  </div>
+
+  <div class="exercise-block">
+    <div class="exercise-num">3</div>
+    <h4>¿El analizador léxico es la primera, segunda o tercera fase del compilador?</h4>
+    <div class="options-grid">
+      <button class="option-btn" onclick="checkAnswer(this,'an3')" data-correct="true">a) Primera</button>
+      <button class="option-btn" onclick="checkAnswer(this,'an3')">b) Segunda</button>
+      <button class="option-btn" onclick="checkAnswer(this,'an3')">c) Tercera</button>
+      <button class="option-btn" onclick="checkAnswer(this,'an3')">d) Depende del compilador</button>
+    </div>
+    <div class="feedback" id="an3-ok">✅ ¡Correcto! El análisis léxico es SIEMPRE la primera fase. Transforma el texto fuente en tokens.</div>
+    <div class="feedback" id="an3-fail">❌ El análisis léxico es la primera fase del compilador, siempre, sin excepción.</div>
+  </div>
+
+  <!-- JUEGO ERRORES -->
+  <div class="game-area">
+    <h3>🎮 Juego: Encuentra el Error Léxico</h3>
+    <p>Identifica cuál de las 4 sentencias tiene un error léxico. ¡5 rondas!</p>
+    <div id="err-prompt" style="background:rgba(0,0,0,.3);padding:14px 16px;border-radius:var(--r12);margin-bottom:14px;font-size:.83rem;color:var(--text2);border:1px solid var(--border)">Pulsa Iniciar para empezar</div>
+    <div id="err-options" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span id="err-score" class="score-badge">⭐ Puntos: 0</span>
+      <span id="err-round" style="font-size:.78rem;color:var(--text3)">0/5</span>
+    </div>
+    <button class="btn-verde" id="err-start-btn" onclick="startErrGame()" style="margin-top:16px;width:100%">▶ Iniciar Juego</button>
+  </div>
+</div>
+
+<!-- ── EVALUACIÓN ── -->
+<div id="evaluacion" class="section">
+  <div class="section-title">Evaluación Final</div>
+  <p class="section-sub">10 preguntas de todos los temas · Demuestra lo que aprendiste</p>
+  <div class="eval-progress">
+    <div class="eval-progress-bar" id="eval-bar" style="width:0%"></div>
+  </div>
+  <div id="eval-container"></div>
+  <div class="eval-result" id="eval-result">
+    <span class="trophy" id="eval-trophy">🏆</span>
+    <div class="result-score" id="eval-score-txt"></div>
+    <div class="result-msg" id="eval-msg"></div>
+    <button class="btn-verde" onclick="restartEval()">🔄 Repetir Evaluación</button>
+  </div>
+  <div id="eval-nav" style="display:none;justify-content:space-between;margin-top:24px">
+    <button class="btn-outline" id="eval-prev" onclick="evalPrev()" disabled>← Anterior</button>
+    <button class="btn-verde" id="eval-next" onclick="evalNext()">Siguiente →</button>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  <p>OVA desarrollada en <strong>Teoría de Compiladores</strong> · Universidad Simón Bolívar · 2026</p>
+  <p style="margin-top:6px">Desarrollado por: <strong>Johan Humberto Villegas Cañizares</strong></p>
+  <p class="f-credits">Contenido basado en las exposiciones de: Kevin García · Sofi Galvis · Fabián Jaimes · Joel Pineda Rincón</p>
+</footer>
+
+<script>
+/* ═══ PARTICLES ═══ */
+(function(){
+  const canvas=document.getElementById('particle-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H,pts=[];
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}
+  resize();window.addEventListener('resize',resize);
+  function rand(a,b){return Math.random()*(b-a)+a}
+  for(let i=0;i<70;i++) pts.push({x:rand(0,1),y:rand(0,1),vx:rand(-.0002,.0002),vy:rand(-.0002,.0002),r:rand(.8,2.5),a:rand(.2,.7)});
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0)p.x=1;if(p.x>1)p.x=0;
+      if(p.y<0)p.y=1;if(p.y>1)p.y=0;
+      const px=p.x*W,py=p.y*H;
+      ctx.beginPath();ctx.arc(px,py,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(10,132,59,${p.a})`;ctx.fill();
+    });
+    pts.forEach((a,i)=>{pts.slice(i+1).forEach(b=>{
+      const dx=(a.x-b.x)*W,dy=(a.y-b.y)*H,d=Math.sqrt(dx*dx+dy*dy);
+      if(d<120){ctx.beginPath();ctx.moveTo(a.x*W,a.y*H);ctx.lineTo(b.x*W,b.y*H);
+        ctx.strokeStyle=`rgba(10,132,59,${.12*(1-d/120)})`;ctx.lineWidth=.5;ctx.stroke()}
+    })});
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ═══ TYPEWRITER ═══ */
+const twLines=[
+  {text:'// Analizador Léxico en acción',color:'#607a6a'},
+  {text:'int x = 10 + suma;',color:'#e8f5ee',tokens:[
+    {t:'int',c:'t-keyword'},{t:'x',c:'t-id'},{t:'=',c:'t-op'},{t:'10',c:'t-num'},{t:'+',c:'t-op'},{t:'suma',c:'t-id'},{t:';',c:'t-delim'}
+  ]},
+  {text:'while (x > 0) {',color:'#e8f5ee',tokens:[
+    {t:'while',c:'t-keyword'},{t:'(',c:'t-delim'},{t:'x',c:'t-id'},{t:'>',c:'t-op'},{t:'0',c:'t-num'},{t:')',c:'t-delim'},{t:'{',c:'t-delim'}
+  ]},
+  {text:'  return "resultado";',color:'#e8f5ee',tokens:[
+    {t:'return',c:'t-keyword'},{t:'"resultado"',c:'t-string'},{t:';',c:'t-delim'}
+  ]},
+];
+let twIdx=0,twCharIdx=0,twTokensShown=false;
+const twOut=document.getElementById('tw-output');
+const twToks=document.getElementById('tw-tokens');
+function twType(){
+  const line=twLines[twIdx];
+  if(twCharIdx<=line.text.length){
+    twOut.textContent=line.text.slice(0,twCharIdx);
+    twOut.style.color=line.color;
+    twCharIdx++;
+    setTimeout(twType,twCharIdx===line.text.length?600:38);
+  } else {
+    if(line.tokens&&!twTokensShown){
+      twTokensShown=true;
+      twToks.innerHTML='<span style="font-size:.65rem;color:var(--text3);margin-right:6px;font-family:Montserrat,sans-serif;letter-spacing:.8px;text-transform:uppercase">Tokens:</span>';
+      line.tokens.forEach((tk,i)=>{
+        setTimeout(()=>{
+          const s=document.createElement('span');
+          s.className='token-pill '+tk.c;
+          s.textContent=tk.t;s.style.fontSize='.72rem';s.style.padding='4px 12px';
+          twToks.appendChild(s);
+        },i*100);
+      });
+    }
+    setTimeout(()=>{
+      twTokensShown=false;twToks.innerHTML='';
+      twIdx=(twIdx+1)%twLines.length;twCharIdx=0;twType();
+    },2800);
+  }
+}
+setTimeout(twType,800);
+
+/* ═══ NAVIGATION ═══ */
+document.querySelectorAll('.nav-link').forEach(link=>{
+  link.addEventListener('click',e=>{
+    e.preventDefault();
+    const t=link.getAttribute('data-section');
+    document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    link.classList.add('active');
+    document.getElementById(t).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(t==='evaluacion')initEval();
+  });
+});
+
+/* ═══ TOKENIZER ═══ */
+function tokenize(code){
+  const out=document.getElementById('tok-output');
+  const rules=[
+    {type:'string',re:/"[^"]*"/g,cls:'t-string'},
+    {type:'keyword',re:/\b(int|float|double|char|if|else|while|for|return|void|class|true|false|null|new|break|continue|do|switch|case|default|static|public|private|protected|boolean|string|long|short|byte)\b/g,cls:'t-keyword'},
+    {type:'number',re:/\b\d+(\.\d+)?\b/g,cls:'t-num'},
+    {type:'identifier',re:/\b[a-zA-Z_][a-zA-Z0-9_]*\b/g,cls:'t-id'},
+    {type:'operator',re:/[+\-*\/=!<>%&|^~]+/g,cls:'t-op'},
+    {type:'delimiter',re:/[(){}\[\];,.:]/g,cls:'t-delim'},
+  ];
+  let marked=[];
+  rules.forEach(({type,re,cls})=>{
+    let m;re.lastIndex=0;
+    while((m=re.exec(code))!==null){
+      if(!marked.some(r=>m.index<r.end&&m.index+m[0].length>r.start))
+        marked.push({start:m.index,end:m.index+m[0].length,text:m[0],type,cls});
+    }
+  });
+  marked.sort((a,b)=>a.start-b.start);
+  out.innerHTML='';
+  if(!marked.length){out.innerHTML='<span style="color:var(--text3);font-size:.8rem">Escribe código válido...</span>';return;}
+  marked.forEach(t=>{
+    const pill=document.createElement('span');
+    pill.className='token-pill '+t.cls;
+    const lbl={string:'STR',keyword:'KW',number:'NUM',identifier:'ID',operator:'OP',delimiter:'DLM'}[t.type];
+    pill.textContent=t.text;pill.title=lbl+': '+t.text;
+    out.appendChild(pill);
+    const lb=document.createElement('span');lb.className='match-type';lb.textContent=lbl;
+    out.appendChild(lb);
+  });
+}
+const tokInput=document.getElementById('tok-input');
+if(tokInput){tokInput.addEventListener('input',()=>tokenize(tokInput.value));tokenize(tokInput.value);}
+
+/* ═══ CONFETTI ═══ */
+function spawnConfetti(){
+  const c=document.getElementById('confetti-container');
+  const colors=['#4ade80','#0A843B','#39ff9e','#ACCDB6','#fff','#fbbf24'];
+  for(let i=0;i<60;i++){
+    const p=document.createElement('div');p.className='confetti-piece';
+    p.style.left=Math.random()*100+'vw';
+    p.style.background=colors[Math.floor(Math.random()*colors.length)];
+    p.style.animationDuration=(Math.random()*2+1.5)+'s';
+    p.style.animationDelay=Math.random()*.4+'s';
+    p.style.width=p.style.height=(Math.random()*8+4)+'px';
+    p.style.borderRadius=Math.random()>.5?'50%':'2px';
+    c.appendChild(p);
+    setTimeout(()=>p.remove(),(Math.random()*2+1.5)*1000+600);
+  }
+}
+
+/* ═══ EXERCISE CHECKER — usa data-correct en vez de ✓ en el texto ═══ */
+function checkAnswer(btn, id){
+  const isCorrect = btn.getAttribute('data-correct') === 'true';
+  btn.closest('.options-grid').querySelectorAll('.option-btn').forEach(s=>s.disabled=true);
+  const okEl=document.getElementById(id+'-ok');
+  const failEl=document.getElementById(id+'-fail');
+  if(isCorrect){
+    btn.classList.add('correct');
+    if(okEl){okEl.style.display='block';okEl.className='feedback show ok';}
+    spawnConfetti();
+  } else {
+    btn.classList.add('wrong');
+    btn.closest('.options-grid').querySelectorAll('.option-btn').forEach(s=>{
+      if(s.getAttribute('data-correct')==='true') s.classList.add('correct');
+    });
+    if(failEl){failEl.style.display='block';failEl.className='feedback show fail';}
+  }
+}
+
+/* ═══ DRAG & DROP GAME ═══ */
+let dragging=null;
+function initDragGame(){
+  document.querySelectorAll('.drag-token').forEach(token=>{
+    token.addEventListener('dragstart',e=>{dragging=token;e.dataTransfer.setData('text',token.getAttribute('data-type'));});
+  });
+  document.querySelectorAll('.drop-zone').forEach(zone=>{
+    zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag-over');});
+    zone.addEventListener('dragleave',()=>zone.classList.remove('drag-over'));
+    zone.addEventListener('drop',e=>{
+      e.preventDefault();zone.classList.remove('drag-over');
+      if(dragging){
+        const clone=dragging.cloneNode(true);clone.removeAttribute('draggable');
+        zone.querySelector('.dropped').appendChild(clone);
+        dragging.style.opacity='.25';dragging.setAttribute('draggable','false');dragging=null;
+      }
+    });
+  });
+}
+function checkDragGame(){
+  let correct=0;
+  document.querySelectorAll('.drop-zone').forEach(zone=>{
+    const acc=zone.getAttribute('data-accepts');
+    zone.querySelectorAll('.drag-token').forEach(t=>{if(t.getAttribute('data-type')===acc)correct++;});
+  });
+  const r=document.getElementById('drag-result');
+  const pct=Math.round(correct/8*100);
+  if(correct===8){r.innerHTML='<span style="color:#4ade80;font-size:.95rem;font-weight:700">🎉 ¡Perfecto! 8/8 correctos</span>';spawnConfetti();}
+  else r.innerHTML=`<span style="color:var(--text2)">✅ ${correct}/8 correctos (${pct}%) ${pct>=75?'— ¡Muy bien!':'— Sigue practicando.'}</span>`;
+}
+function resetDragGame(){
+  document.querySelectorAll('.drop-zone .dropped').forEach(d=>d.innerHTML='');
+  document.querySelectorAll('#pool-lexico .drag-token').forEach(t=>{t.style.opacity='1';t.setAttribute('draggable','true');});
+  document.getElementById('drag-result').innerHTML='';
+}
+initDragGame();
+
+/* ═══ TOKEN TYPE GAME ═══ */
+const tokenGameData=[
+  {token:'while',type:'Palabra Reservada',wrong:['Identificador','Operador','Delimitador']},
+  {token:'suma',type:'Identificador',wrong:['Palabra Reservada','Operador','Literal']},
+  {token:'42',type:'Literal numérico',wrong:['Identificador','Operador','Delimitador']},
+  {token:'>=',type:'Operador relacional',wrong:['Identificador','Delimitador','Palabra Reservada']},
+  {token:';',type:'Delimitador',wrong:['Operador','Identificador','Literal']},
+  {token:'return',type:'Palabra Reservada',wrong:['Identificador','Literal','Operador']},
+  {token:'miVar',type:'Identificador',wrong:['Literal','Palabra Reservada','Delimitador']},
+  {token:'"hola"',type:'Literal de cadena',wrong:['Identificador','Operador','Delimitador']},
+  {token:'==',type:'Operador relacional',wrong:['Delimitador','Literal','Identificador']},
+  {token:'(',type:'Delimitador',wrong:['Operador','Palabra Reservada','Literal']},
+];
+let tgScore=0,tgRound=0;
+function startTokenGame(){
+  tgScore=0;tgRound=0;
+  document.getElementById('tg-start').style.display='none';
+  document.getElementById('tg-result').style.display='none';
+  nextTokenRound();
+}
+function nextTokenRound(){
+  if(tgRound>=10){
+    document.getElementById('tg-result').style.display='block';
+    document.getElementById('tg-final-score').textContent=tgScore+'/10 ⭐';
+    if(tgScore>=8)spawnConfetti();
+    return;
+  }
+  const data=tokenGameData[tgRound];
+  const display=document.getElementById('tg-token');
+  display.style.transform='scale(.8)';display.style.opacity='0';
+  setTimeout(()=>{
+    display.textContent=data.token;
+    display.style.transition='all .3s cubic-bezier(.175,.885,.32,1.275)';
+    display.style.transform='scale(1)';display.style.opacity='1';
+  },150);
+  document.getElementById('tg-round').textContent='Ronda '+(tgRound+1)+'/10';
+  const opts=[data.type,...data.wrong].sort(()=>Math.random()-.5);
+  const container=document.getElementById('tg-options');container.innerHTML='';
+  opts.forEach(opt=>{
+    const b=document.createElement('button');
+    b.style.cssText='background:var(--card2);color:var(--text);border:1px solid var(--border);padding:9px 10px;border-radius:var(--r8);cursor:pointer;font-size:.78rem;transition:all .2s;font-family:Inter,sans-serif;';
+    b.textContent=opt;
+    b.addEventListener('mouseover',()=>{b.style.borderColor='var(--g2)';b.style.color='#fff';});
+    b.addEventListener('mouseout',()=>{b.style.borderColor='var(--border)';b.style.color='var(--text)';});
+    b.onclick=()=>{
+      Array.from(container.children).forEach(c=>c.disabled=true);
+      if(opt===data.type){
+        b.style.background='rgba(74,222,128,.15)';b.style.borderColor='#4ade80';b.style.color='#4ade80';
+        tgScore++;spawnConfetti();
+      } else {
+        b.style.background='rgba(248,113,113,.1)';b.style.borderColor='#f87171';b.style.color='#f87171';
+        Array.from(container.children).forEach(c=>{if(c.textContent===data.type){c.style.background='rgba(74,222,128,.1)';c.style.borderColor='#4ade80';c.style.color='#4ade80';}});
+      }
+      document.getElementById('tg-score').textContent='⭐ Puntos: '+tgScore;
+      tgRound++;setTimeout(nextTokenRound,950);
+    };
+    container.appendChild(b);
+  });
+}
+function resetTokenGame(){
+  document.getElementById('tg-start').style.display='block';
+  document.getElementById('tg-result').style.display='none';
+  document.getElementById('tg-options').innerHTML='';
+  document.getElementById('tg-token').textContent='—';
+  document.getElementById('tg-score').textContent='⭐ Puntos: 0';
+  document.getElementById('tg-round').textContent='Ronda 1/10';
+}
+
+/* ═══ ER GAME ═══ */
+const erGameData=[
+  {desc:'Reconoce uno o más dígitos (número entero)',correct:'[0-9]+',wrong:['[0-9]*','[a-z]+','[0-9]?']},
+  {desc:'Reconoce un identificador válido (inicia con letra o _)',correct:'[a-zA-Z_][a-zA-Z0-9_]*',wrong:['[0-9][a-zA-Z]*','[a-z]+','[a-zA-Z]']},
+  {desc:'Reconoce "cero o una" aparición de la letra a',correct:'a?',wrong:['a+','a*','[a]']},
+  {desc:'Reconoce un número real (ej: 3.14)',correct:'[0-9]+\\.[0-9]+',wrong:['[0-9]+','\\.[0-9]','[0-9]*']},
+  {desc:'Reconoce la palabra "if" o "else" exactamente',correct:'if|else',wrong:['if else','(if)(else)','if+else']},
+];
+let erScore=0,erRound=0,erLives=3;
+function startERGame(){
+  erScore=0;erRound=0;erLives=3;
+  document.getElementById('er-start-btn').style.display='none';
+  updateERGame();
+}
+function updateERGame(){
+  document.getElementById('er-lives').textContent='❤️'.repeat(erLives)+'🖤'.repeat(3-erLives);
+  if(erRound>=erGameData.length||erLives<=0){
+    const msg=erLives<=0?'💔 Sin vidas. Puntos: '+erScore:'🎉 ¡Completado! Puntos: '+erScore+'/5';
+    document.getElementById('er-prompt').innerHTML='<span style="color:'+(erLives>0?'#4ade80':'#f87171')+'">'+msg+'</span>';
+    document.getElementById('er-options-game').innerHTML='<button class="btn-verde" onclick="resetERGame()" style="width:100%">↺ Jugar de nuevo</button>';
+    if(erLives>0&&erScore>=4)spawnConfetti();
+    return;
+  }
+  const data=erGameData[erRound];
+  document.getElementById('er-prompt').innerHTML='🎯 ¿Qué ER corresponde a: <strong style="color:#fff">'+data.desc+'</strong>?';
+  document.getElementById('er-round-g').textContent=erRound+'/'+erGameData.length+' completadas';
+  const opts=[data.correct,...data.wrong].sort(()=>Math.random()-.5);
+  const container=document.getElementById('er-options-game');container.innerHTML='';
+  opts.forEach(opt=>{
+    const b=document.createElement('button');
+    b.className='option-btn';
+    b.style.fontFamily='Source Code Pro,monospace';b.style.fontSize='.78rem';
+    b.textContent=opt;
+    b.onclick=()=>{
+      Array.from(container.children).forEach(c=>c.disabled=true);
+      if(opt===data.correct){b.classList.add('correct');erScore++;spawnConfetti();}
+      else{b.classList.add('wrong');erLives--;Array.from(container.children).forEach(c=>{if(c.textContent===data.correct)c.classList.add('correct');});}
+      erRound++;document.getElementById('er-score').textContent='⭐ Puntos: '+erScore;
+      setTimeout(updateERGame,950);
+    };
+    container.appendChild(b);
+  });
+}
+function resetERGame(){
+  erScore=0;erRound=0;erLives=3;
+  document.getElementById('er-start-btn').style.display='block';
+  document.getElementById('er-prompt').textContent='Presiona Iniciar para comenzar';
+  document.getElementById('er-options-game').innerHTML='';
+  document.getElementById('er-score').textContent='⭐ Puntos: 0';
+  document.getElementById('er-round-g').textContent='0/5 completadas';
+  document.getElementById('er-lives').textContent='❤️ ❤️ ❤️';
+}
+
+/* ═══ ERROR GAME ═══ */
+const errData=[
+  {q:'¿Cuál sentencia tiene error léxico?',opts:[{t:'int x = 5;',err:false},{t:'float #y = 2.1;',err:true},{t:'return suma;',err:false},{t:'x += 10;',err:false}]},
+  {q:'¿Cuál sentencia tiene error léxico?',opts:[{t:'char c = \'A\';',err:false},{t:'int 1count = 0;',err:true},{t:'if(x > 0)',err:false},{t:'void mostrar()',err:false}]},
+  {q:'¿Cuál sentencia tiene error léxico?',opts:[{t:'double pi = 3.14;',err:false},{t:'float x = 1.2.3;',err:true},{t:'int suma = a + b;',err:false},{t:'while(true)',err:false}]},
+  {q:'¿Cuál sentencia tiene error léxico?',opts:[{t:'int[] arr = new int[5];',err:false},{t:'printf("Hola);',err:true},{t:'return 0;',err:false},{t:'break;',err:false}]},
+  {q:'¿Cuál sentencia tiene error léxico?',opts:[{t:'boolean flag = true;',err:false},{t:'int x = @5;',err:true},{t:'suma = suma + 1;',err:false},{t:'for(int i=0;i<10;i++)',err:false}]},
+];
+let errScore=0,errRound=0;
+function startErrGame(){errScore=0;errRound=0;document.getElementById('err-start-btn').style.display='none';nextErrRound();}
+function nextErrRound(){
+  if(errRound>=errData.length){
+    document.getElementById('err-prompt').innerHTML='<span style="color:#4ade80;font-weight:700">🎉 Completado · Puntuación: '+errScore+'/5</span>';
+    document.getElementById('err-options').innerHTML='<button class="btn-verde" onclick="startErrGame()" style="width:100%">↺ Jugar de nuevo</button>';
+    if(errScore>=4)spawnConfetti();return;
+  }
+  const data=errData[errRound];
+  document.getElementById('err-prompt').textContent=(errRound+1)+'/5 · '+data.q;
+  document.getElementById('err-round').textContent=errRound+'/5';
+  const container=document.getElementById('err-options');container.innerHTML='';
+  data.opts.forEach(opt=>{
+    const b=document.createElement('button');
+    b.style.cssText='background:rgba(255,255,255,.05);color:var(--text);border:1px solid var(--border);padding:10px 14px;border-radius:var(--r8);cursor:pointer;text-align:left;font-family:Source Code Pro,monospace;font-size:.78rem;transition:all .2s;width:100%;';
+    b.textContent=opt.t;
+    if(opt.err)b.setAttribute('data-err','true');
+    b.addEventListener('mouseover',()=>{b.style.background='rgba(10,132,59,.1)';b.style.borderColor='var(--border2)';});
+    b.addEventListener('mouseout',()=>{b.style.background='rgba(255,255,255,.05)';b.style.borderColor='var(--border)';});
+    b.onclick=()=>{
+      Array.from(container.children).forEach(c=>c.style.pointerEvents='none');
+      if(opt.err){b.style.background='rgba(74,222,128,.15)';b.style.borderColor='#4ade80';b.style.color='#4ade80';errScore++;spawnConfetti();}
+      else{b.style.background='rgba(248,113,113,.1)';b.style.borderColor='#f87171';b.style.color='#f87171';
+        Array.from(container.children).forEach(c=>{if(c.getAttribute('data-err')){c.style.background='rgba(74,222,128,.1)';c.style.borderColor='#4ade80';c.style.color='#4ade80';}});
+      }
+      document.getElementById('err-score').textContent='⭐ Puntos: '+errScore;
+      errRound++;setTimeout(nextErrRound,1000);
+    };
+    container.appendChild(b);
+  });
+}
+
+/* ═══ EVALUATION ═══ */
+const evalQuestions=[
+  {q:'¿Cuál es la primera fase de un compilador?',opts:['Análisis semántico','Análisis sintáctico','Análisis léxico','Generación de código'],ans:2},
+  {q:'¿Qué es un token?',opts:['Un tipo de error','La unidad léxica mínima con significado','Un archivo de configuración','Un operador booleano'],ans:1},
+  {q:'¿Cuál de estos es un identificador VÁLIDO?',opts:['2suma','mi var','_miVar','while'],ans:2},
+  {q:'¿Qué representa el par (IDENTIFIER, "suma") en un token?',opts:['Solo el tipo de dato','El tipo y el valor/lexema del token','La dirección de memoria','El ámbito de la variable'],ans:1},
+  {q:'¿Qué hace el operador * en una Expresión Regular?',opts:['Multiplica dos expresiones','Permite cero o más repeticiones','Obliga a una aparición','Indica el fin de cadena'],ans:1},
+  {q:'El principio Maximal Munch significa:',opts:['Tomar el token más corto posible','Dividir tokens cuando hay duda','Consumir la secuencia de caracteres más larga posible','Ignorar tokens desconocidos'],ans:2},
+  {q:'¿Cuál ER reconoce un número entero sin signo?',opts:['[a-z]+','[0-9]+','[0-9]*','[0-9]?'],ans:1},
+  {q:'¿Qué es un lexema?',opts:['La categoría del token','La regla ER que reconoce el token','El valor literal del token en el código fuente','El código numérico del token'],ans:2},
+  {q:'¿Las palabras reservadas se guardan en la tabla de símbolos?',opts:['Sí, siempre','No, tienen significado fijo predefinido','Solo si son de tipo int','Solo en C++'],ans:1},
+  {q:'¿Cuál de estas NO es una fase del compilador?',opts:['Análisis léxico','Análisis sintáctico','Análisis visual','Generación de código'],ans:2},
+];
+let evalCurrent=0,evalAnswers=[],evalStarted=false;
+function initEval(){
+  if(evalStarted)return;
+  evalStarted=true;evalAnswers=new Array(evalQuestions.length).fill(-1);
+  renderEvalQuestion(0);document.getElementById('eval-nav').style.display='flex';
+}
+function renderEvalQuestion(idx){
+  const container=document.getElementById('eval-container');container.innerHTML='';
+  const q=evalQuestions[idx];
+  const div=document.createElement('div');div.className='eval-question active';
+  div.innerHTML=`<div style="font-size:.72rem;color:var(--text3);margin-bottom:10px;font-family:Montserrat,sans-serif;font-weight:600;letter-spacing:.5px">PREGUNTA ${idx+1} DE ${evalQuestions.length}</div><div class="eval-q-text">${q.q}</div><div class="eval-options" id="eval-opts"></div><div id="eval-fb" style="display:none;padding:12px 16px;border-radius:var(--r8);font-size:.83rem;margin-top:10px"></div>`;
+  container.appendChild(div);
+  const opts=document.getElementById('eval-opts');
+  q.opts.forEach((opt,i)=>{
+    const b=document.createElement('button');b.className='eval-option';
+    b.textContent=String.fromCharCode(65+i)+') '+opt;
+    if(evalAnswers[idx]!==-1){
+      b.disabled=true;
+      if(i===q.ans)b.classList.add('sel-correct');
+      if(i===evalAnswers[idx]&&i!==q.ans)b.classList.add('sel-wrong');
+    }
+    b.onclick=()=>{
+      evalAnswers[idx]=i;
+      Array.from(opts.children).forEach(c=>c.disabled=true);
+      if(i===q.ans){b.classList.add('sel-correct');showEvalFeedback(true,q.ans,q.opts[q.ans]);spawnConfetti();}
+      else{b.classList.add('sel-wrong');opts.children[q.ans].classList.add('show-correct');showEvalFeedback(false,q.ans,q.opts[q.ans]);}
+      updateEvalBar();
+    };
+    opts.appendChild(b);
+  });
+  updateEvalBar();evalCurrent=idx;
+  document.getElementById('eval-prev').disabled=idx===0;
+  document.getElementById('eval-next').textContent=idx===evalQuestions.length-1?'Ver resultado ✓':'Siguiente →';
+}
+function showEvalFeedback(correct,ansIdx,ansText){
+  const fb=document.getElementById('eval-fb');fb.style.display='block';
+  fb.style.background=correct?'rgba(74,222,128,.1)':'rgba(248,113,113,.1)';
+  fb.style.border='1px solid '+(correct?'rgba(74,222,128,.3)':'rgba(248,113,113,.3)');
+  fb.style.borderLeft='3px solid '+(correct?'#4ade80':'#f87171');
+  fb.style.color=correct?'#4ade80':'#f87171';
+  fb.textContent=correct?'✅ ¡Correcto!':'❌ La respuesta correcta es: '+String.fromCharCode(65+ansIdx)+') '+ansText;
+}
+function updateEvalBar(){
+  const answered=evalAnswers.filter(a=>a!==-1).length;
+  document.getElementById('eval-bar').style.width=(answered/evalQuestions.length*100)+'%';
+}
+function evalNext(){
+  if(evalCurrent===evalQuestions.length-1)showEvalResults();
+  else renderEvalQuestion(evalCurrent+1);
+}
+function evalPrev(){if(evalCurrent>0)renderEvalQuestion(evalCurrent-1);}
+function showEvalResults(){
+  document.getElementById('eval-container').style.display='none';
+  document.getElementById('eval-nav').style.display='none';
+  const correct=evalAnswers.filter((a,i)=>a===evalQuestions[i].ans).length;
+  const pct=Math.round(correct/evalQuestions.length*100);
+  document.getElementById('eval-result').classList.add('show');
+  document.getElementById('eval-score-txt').textContent=correct+'/'+evalQuestions.length+' · '+pct+'%';
+  let trophy='🏆',msg='';
+  if(pct>=90){trophy='🥇';msg='¡Sobresaliente! Dominas el análisis léxico a la perfección.';}
+  else if(pct>=70){trophy='🥈';msg='¡Muy bien! Tienes buen dominio de los conceptos. Revisa los que fallaste.';}
+  else if(pct>=50){trophy='🥉';msg='Aprobado. Repasa los temas donde fallaste y vuelve a intentarlo.';}
+  else{trophy='📚';msg='Necesitas repasar más. ¡Vuelve a los temas y practica los ejercicios!';}
+  document.getElementById('eval-trophy').textContent=trophy;
+  document.getElementById('eval-msg').textContent=msg;
+  document.getElementById('eval-bar').style.width='100%';
+  if(pct>=70)spawnConfetti();
+}
+function restartEval(){
+  evalStarted=false;evalCurrent=0;evalAnswers=[];
+  document.getElementById('eval-result').classList.remove('show');
+  document.getElementById('eval-container').style.display='block';
+  document.getElementById('eval-nav').style.display='flex';
+  document.getElementById('eval-bar').style.width='0%';
+  initEval();
+}
+</script>
+</body>
+</html>
